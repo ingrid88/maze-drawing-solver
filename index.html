@@ -70,10 +70,12 @@
     p_matrix[element.x][element.y] = pos
     // get neighbors of element
     n = neighbors(matrix, element)
-    for element in n:
+    for(var j=0; j<n.length; j++) {
+      element = n[j]
       if (matrix[element.x][element.y] == 0){
         queue.push(element)
       }
+    }
     // if neighbors are zero, add them to queue
     if ((queue.length) > 0){
       walk_around(queue, p_matrix, i)
