@@ -61,28 +61,29 @@
   }
   // console.log(neighbors(matrix, {x:4,y:0}))
 
+  // BFS
   var finished = false;
   var queue = []
-  function walk_around(pos, p_matrix, i){
-    var n = neighbors(matrix, pos)
-    matrix[pos.x][pos.y] = 2
-
-
-    queue = queue + n
-    // print_matrix(matrix)
-    n_pos = queue.unshift()
-    n_n = neighbors(matrix, n_pos)
-    if(matrix[n_pos.x][n_pos.y] == 0){
-      p_matrix[n_pos.x][n_pos.y] = pos
-      if(n_pos.y == end.y && n_pos.x == end.x){
-        get_path(end, p_matrix)
-        finished = true
-        return
+  function walk_around(queue, p_matrix, i){
+    queue.push(pos)
+    element = queue.unshift()
+    p_matrix[element.x][element.y] = pos
+    // get neighbors of element
+    n = neighbors(matrix, element)
+    for element in n:
+      if (matrix[element.x][element.y] == 0){
+        queue.push(element)
       }
+    // if neighbors are zero, add them to queue
+    if ((queue.length) > 0){
+      walk_around(queue, p_matrix, i)
+    } else {
+      return
     }
-          queue = queue + nz
-    })
+
   }
+
+  // DFS
   // function walk_around(pos, p_matrix, i){
   //   var n = neighbors(matrix, pos)
   //   matrix[pos.x][pos.y] = 2
