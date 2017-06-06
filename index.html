@@ -75,7 +75,7 @@
       if (matrix[element.x][element.y] == 0){
         queue.push(element)
       }
-    }
+
     // if neighbors are zero, add them to queue
     if ((queue.length) > 0){
       walk_around(queue, p_matrix, i)
@@ -115,7 +115,8 @@
             p_matrix[i][j] = {x:0,y:0};
         }
     }
-    walk_around(start, p_matrix, i)
+    queue.push(start)
+    walk_around(queue, p_matrix, i)
     // print_matrix(matrix)
     // print_pmatrix(p_matrix)
     return matrix
