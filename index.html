@@ -1,0 +1,216 @@
+
+
+<html>
+<body style="margin:0" oncontextmenu="return false;">
+
+<canvas id="maze" width="500" height="500" ></canvas>
+<script>
+  var drawing = false;
+  var canvas = document.getElementById("maze");
+  var ctx = canvas.getContext("2d");
+  var last_position = {
+    x:0,
+    y:0
+  }
+  var start, end;
+  var click_count = 0
+
+  // var matrix = [
+  //   [0,0,0,0,0],
+  //   [0,0,1,0,0],
+  //   [0,0,1,0,0],
+  //   [0,0,1,0,0],
+  //   [0,0,1,0,0]
+  // ]
+
+  var p_pos = {x:undefined,y:undefined}
+
+  // var p_matrix = [];
+  // for(var i=0; i<matrix.length; i++) {
+  //     p_matrix[i] = [];
+  //     for(var j=0; j<matrix[0].length; j++) {
+  //         p_matrix[i][j] = {x:0,y:0};
+  //     }
+  // }
+
+  function neighbors(matrix, pos){
+    var moves = [[1,1],[0,1],[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[1,-1]];
+    n = []
+    moves.forEach(function(element){
+      new_x = pos.x + element[0]
+      new_y = pos.y + element[1]
+      new_pos = {x: new_x, y: new_y}
+      if(new_pos.x >= 0
+          && new_pos.y >= 0
+          && new_pos.y < matrix.length
+          && new_pos.x < matrix[0].length
+          && matrix[new_pos.x][new_pos.y] == 0){
+        n.push(new_pos)
+      }
+    })
+    return n
+  }
+
+  function get_path(pos, p_matrix){
+    if (pos.x != start.x || pos.y != start.y){
+      matrix[pos.x][pos.y] = 3
+      p_pos = p_matrix[pos.x][pos.y]
+      console.log(pos.x +" "+ pos.y);
+      get_path(p_pos, p_matrix)
+    }
+  }
+  // console.log(neighbors(matrix, {x:4,y:0}))
+
+  var finished = false;
+  var queue = []
+  function walk_around(pos, p_matrix, i){
+    var n = neighbors(matrix, pos)
+    matrix[pos.x][pos.y] = 2
+
+
+    queue = queue + n
+    // print_matrix(matrix)
+    n_pos = queue.unshift()
+    n_n = neighbors(matrix, n_pos)
+    if(matrix[n_pos.x][n_pos.y] == 0){
+      p_matrix[n_pos.x][n_pos.y] = pos
+      if(n_pos.y == end.y && n_pos.x == end.x){
+        get_path(end, p_matrix)
+        finished = true
+        return
+      }
+    }
+          queue = queue + nz
+    })
+  }
+  // function walk_around(pos, p_matrix, i){
+  //   var n = neighbors(matrix, pos)
+  //   matrix[pos.x][pos.y] = 2
+  //   // print_matrix(matrix)
+  //   n.forEach(function(element){
+  //     if(finished) {
+  //       return;
+  //     }
+  //     if(matrix[element.x][element.y] == 0){
+  //     p_matrix[element.x][element.y] = pos
+  //     if(element.y == end.y && element.x == end.x){
+  //       get_path(end, p_matrix)
+  //       finished = true
+  //       return
+  //     }
+  //       walk_around(element, p_matrix, i+1)
+  //     }
+  //   })
+  // }
+
+  function solve_maze(matrix, start, end){
+    var i = 2
+    var p_matrix = [];
+    for(var i=0; i<matrix.length; i++) {
+        p_matrix[i] = [];
+        for(var j=0; j<matrix[0].length; j++) {
+            p_matrix[i][j] = {x:0,y:0};
+        }
+    }
+    walk_around(start, p_matrix, i)
+    // print_matrix(matrix)
+    // print_pmatrix(p_matrix)
+    return matrix
+  }
+
+  function print_pmatrix(matrix){
+    str = ''
+    for (var i = 0; i < matrix.length; i++) {
+      for (var j = 0; j < matrix[0].length; j++) {
+          str = str + "("+matrix[i][j].x+","+matrix[i][j].y+")"
+      }
+      str += '\n'
+    }
+    console.log(str);
+  }
+
+  function print_matrix(matrix){
+    str = ''
+    for (var i = 0; i < matrix.length; i++) {
+      for (var j = 0; j < matrix[0].length; j++) {
+          str = str + " " + matrix[i][j]
+      }
+      str += '\n'
+    }
+    console.log(str);
+  }
+
+  // solve_maze(matrix, start = {x:4,y:0}, end = {x:4,y:3})
+
+  function build_matrix(ctx){
+    matrix = []
+    for(var i=0; i<ctx.canvas.width; i++) {
+        matrix[i] = [];
+        for(var j=0; j<ctx.canvas.height; j++) {
+            p_data = ctx.getImageData(j, i, 1, 1).data;
+            if((p_data[0] == 0) && (p_data[3] > 0)){
+              matrix[i][j] = 1
+            } else {
+              matrix[i][j] = 0
+            }
+        }
+    }
+    return matrix
+  }
+
+  function display_path(matrix, ctx){
+    for(var i=0; i<ctx.canvas.width; i++) {
+        for(var j=0; j<ctx.canvas.height; j++) {
+          if(matrix[j][i] == 3){
+            ctx.fillStyle = 'green';
+            ctx.fillRect(j,i,1,1);
+          }
+        }
+    }
+  }
+
+  canvas.addEventListener("mousedown", function (e) {
+    // console.log(e);
+    var x = event.pageX,
+        y = event.pageY;
+    if(e.button == 0){
+      last_position = {x:x, y:y}
+      drawing = true;
+    } else if(e.button == 2){
+        if(click_count == 0){
+          start = {x:x, y:y}
+          // console.log("start: " + start.x);
+        }
+        if(click_count == 1){
+          end = {x:x, y:y}
+          // console.log("end: " + end.x);
+
+          matrix = build_matrix(ctx)
+          print_matrix(matrix)
+          solved_matrix = solve_maze(matrix, start, end)
+          display_path(solved_matrix, ctx)
+        }
+        click_count += 1
+        ctx.fillStyle = 'red';
+        ctx.fillRect(x,y,5,5);
+    }
+  }, false);
+  canvas.addEventListener("mouseup", function (e) {
+    drawing = false;
+  }, false);
+  canvas.addEventListener("mousemove", function (e) {
+    if (drawing){
+      var x = event.pageX,
+          y = event.pageY;
+      // console.log(x + " " + y);
+      ctx.beginPath();
+      ctx.moveTo(last_position.x,last_position.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      last_position = {x:x, y:y}
+    }
+  }, false);
+
+</script>
+</body>
+</html>
