@@ -15,26 +15,58 @@
   var start, end;
   var click_count = 0
 
-  // var matrix = [
-  //   [0,0,0,0,0],
-  //   [0,0,1,0,0],
-  //   [0,0,1,0,0],
-  //   [0,0,1,0,0],
-  //   [0,0,1,0,0]
-  // ]
-
   var p_pos = {x:undefined,y:undefined}
 
-  // var p_matrix = [];
-  // for(var i=0; i<matrix.length; i++) {
-  //     p_matrix[i] = [];
-  //     for(var j=0; j<matrix[0].length; j++) {
-  //         p_matrix[i][j] = {x:0,y:0};
-  //     }
-  // }
+
+  function solve_maze(matrix, start, end){
+    var i = 2
+    var p_matrix = [];
+    for(var i=0; i<matrix.length; i++) {
+        p_matrix[i] = [];
+        for(var j=0; j<matrix[0].length; j++) {
+            p_matrix[i][j] = {x:0,y:0};
+        }
+    }
+    queue.push(start)
+    print_matrix(matrix)
+    walk_around(queue, end, p_matrix, i)
+    // print_matrix(matrix)
+    // print_pmatrix(p_matrix)
+    return matrix
+  }
+
+  // BFS
+  var finished = false;
+  var queue = []
+  function walk_around(queue, end, p_matrix, i){
+    // get neighbors of element
+    while (queue.length > 0 || element.x == end.x && element.y == end.y){
+      element = queue.shift()
+      matrix[element.x][element.y] = 2
+      // ctx.fillStyle = 'green';
+      // ctx.fillRect(element.x,element.y,1,1);
+      // console.log(element.x+":"+element.y);
+      n = neighbors(matrix, element)
+      for(var j=0; j<n.length; j++) {
+        el = n[j]
+        if (matrix[el.x][el.y] == 0){
+          queue.push(el)
+          matrix[el.x][el.y] = 2
+          p_matrix[el.x][el.y] = element
+        }
+      }
+    }
+    if(matrix[end.x][end.y] != 2){
+      alert("Solution NOT Found");
+    } else {
+      get_path(end, p_matrix)
+    }
+
+  }
+
 
   function neighbors(matrix, pos){
-    var moves = [[1,1],[0,1],[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[1,-1]];
+    var moves = [[0,1],[1,0],[-1,0],[0,-1]];
     n = []
     moves.forEach(function(element){
       new_x = pos.x + element[0]
@@ -59,31 +91,6 @@
       get_path(p_pos, p_matrix)
     }
   }
-  // console.log(neighbors(matrix, {x:4,y:0}))
-
-  // BFS
-  var finished = false;
-  var queue = []
-  function walk_around(queue, p_matrix, i){
-    queue.push(pos)
-    element = queue.unshift()
-    p_matrix[element.x][element.y] = pos
-    // get neighbors of element
-    n = neighbors(matrix, element)
-    for(var j=0; j<n.length; j++) {
-      element = n[j]
-      if (matrix[element.x][element.y] == 0){
-        queue.push(element)
-      }
-
-    // if neighbors are zero, add them to queue
-    if ((queue.length) > 0){
-      walk_around(queue, p_matrix, i)
-    } else {
-      return
-    }
-
-  }
 
   // DFS
   // function walk_around(pos, p_matrix, i){
@@ -106,52 +113,13 @@
   //   })
   // }
 
-  function solve_maze(matrix, start, end){
-    var i = 2
-    var p_matrix = [];
-    for(var i=0; i<matrix.length; i++) {
-        p_matrix[i] = [];
-        for(var j=0; j<matrix[0].length; j++) {
-            p_matrix[i][j] = {x:0,y:0};
-        }
-    }
-    queue.push(start)
-    walk_around(queue, p_matrix, i)
-    // print_matrix(matrix)
-    // print_pmatrix(p_matrix)
-    return matrix
-  }
-
-  function print_pmatrix(matrix){
-    str = ''
-    for (var i = 0; i < matrix.length; i++) {
-      for (var j = 0; j < matrix[0].length; j++) {
-          str = str + "("+matrix[i][j].x+","+matrix[i][j].y+")"
-      }
-      str += '\n'
-    }
-    console.log(str);
-  }
-
-  function print_matrix(matrix){
-    str = ''
-    for (var i = 0; i < matrix.length; i++) {
-      for (var j = 0; j < matrix[0].length; j++) {
-          str = str + " " + matrix[i][j]
-      }
-      str += '\n'
-    }
-    console.log(str);
-  }
-
-  // solve_maze(matrix, start = {x:4,y:0}, end = {x:4,y:3})
 
   function build_matrix(ctx){
     matrix = []
     for(var i=0; i<ctx.canvas.width; i++) {
         matrix[i] = [];
         for(var j=0; j<ctx.canvas.height; j++) {
-            p_data = ctx.getImageData(j, i, 1, 1).data;
+            p_data = ctx.getImageData(i, j, 1, 1).data;
             if((p_data[0] == 0) && (p_data[3] > 0)){
               matrix[i][j] = 1
             } else {
@@ -181,6 +149,8 @@
       last_position = {x:x, y:y}
       drawing = true;
     } else if(e.button == 2){
+        ctx.fillStyle = 'red';
+        ctx.fillRect(x,y,3,3);
         if(click_count == 0){
           start = {x:x, y:y}
           // console.log("start: " + start.x);
@@ -188,20 +158,20 @@
         if(click_count == 1){
           end = {x:x, y:y}
           // console.log("end: " + end.x);
-
-          matrix = build_matrix(ctx)
-          print_matrix(matrix)
-          solved_matrix = solve_maze(matrix, start, end)
-          display_path(solved_matrix, ctx)
+          setTimeout(function() {
+            matrix = build_matrix(ctx)
+            solved_matrix = solve_maze(matrix, start, end)
+            display_path(solved_matrix, ctx)
+          }, 20);
         }
         click_count += 1
-        ctx.fillStyle = 'red';
-        ctx.fillRect(x,y,5,5);
     }
   }, false);
+
   canvas.addEventListener("mouseup", function (e) {
     drawing = false;
   }, false);
+
   canvas.addEventListener("mousemove", function (e) {
     if (drawing){
       var x = event.pageX,
@@ -215,6 +185,27 @@
     }
   }, false);
 
+  function print_pmatrix(matrix){
+    str = ''
+    for (var i = 0; i < matrix.length; i++) {
+      for (var j = 0; j < matrix[0].length; j++) {
+          str = str + "("+matrix[i][j].x+","+matrix[i][j].y+")"
+      }
+      str += '\n'
+    }
+    console.log(str);
+  }
+
+  function print_matrix(matrix){
+    str = ''
+    for (var i = 0; i < matrix.length; i++) {
+      for (var j = 0; j < matrix[0].length; j++) {
+          str = str + " " + matrix[i][j]
+      }
+      str += '\n'
+    }
+    console.log(str);
+  }
 </script>
 </body>
 </html>
