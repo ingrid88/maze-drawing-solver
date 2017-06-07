@@ -28,7 +28,7 @@
         }
     }
     queue.push(start)
-    print_matrix(matrix)
+    // print_matrix(matrix)
     walk_around(queue, end, p_matrix, i)
     // print_matrix(matrix)
     // print_pmatrix(p_matrix)
@@ -87,7 +87,7 @@
     if (pos.x != start.x || pos.y != start.y){
       matrix[pos.x][pos.y] = 3
       p_pos = p_matrix[pos.x][pos.y]
-      console.log(pos.x +" "+ pos.y);
+      // console.log(pos.x +" "+ pos.y);
       get_path(p_pos, p_matrix)
     }
   }
